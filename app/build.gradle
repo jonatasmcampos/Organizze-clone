@@ -51,7 +51,9 @@ dependencies {
 
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
-    implementation 'androidx.navigation:navigation-ui:2.3.5'/* slider material intro */
+    implementation 'androidx.navigation:navigation-ui:2.3.5'/* Slider material intro */
+
+    implementation 'com.github.clans:fab:1.6.4' /* Floating action menu */
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

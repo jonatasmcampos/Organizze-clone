@@ -8,4 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="grey">#FF4F4F4F</color>
+
+    <!-- Cores para despesas -->
+    <color name="colorPrimaryDespesa">#FFFF706A</color>
+    <color name="colorPrimaryDarkDespesa">#FFE66560</color>
+    <color name="colorAccentDespesa">#FFFF706A</color>
+
+    <!-- Cores para receitas -->
+    <color name="colorPrimaryReceita">#FF00D36E</color>
+    <color name="colorPrimaryDarkReceita">#FF00BE8B</color>
+    <color name="colorAccentReceita">#FF00D39E</color>
 </resources>
