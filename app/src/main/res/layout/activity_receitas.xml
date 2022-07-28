@@ -46,6 +46,7 @@
         app:layout_constraintVertical_chainStyle="packed">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editData"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="dd/mm/aaaa" />
@@ -65,9 +66,10 @@
         app:layout_constraintTop_toBottomOf="@+id/data">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editCategoria"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Tipo" />
+            android:hint="Categoria" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -83,6 +85,7 @@
         app:layout_constraintTop_toBottomOf="@+id/categoria">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editDescricao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Descrição" />
@@ -94,9 +97,10 @@
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
         android:clickable="true"
+        android:contentDescription="Confirmar"
+        android:onClick="salvarReceita"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_check"
-        android:contentDescription="Confirmar"/>
+        app:srcCompat="@drawable/ic_check" />
 </androidx.constraintlayout.widget.ConstraintLayout>
