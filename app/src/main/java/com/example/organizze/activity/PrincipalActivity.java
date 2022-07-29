@@ -12,11 +12,15 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.organizze.MainActivity;
 import com.example.organizze.R;
+import com.example.organizze.adapter.AdapterMovimentacao;
 import com.example.organizze.config.ConfiguracaoFirebase;
 import com.example.organizze.helper.Base64Custom;
+import com.example.organizze.model.Movimentacao;
 import com.example.organizze.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +32,8 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PrincipalActivity extends AppCompatActivity {
 
@@ -39,7 +45,15 @@ public class PrincipalActivity extends AppCompatActivity {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+    private DatabaseReference usuarioRef;
+    private ValueEventListener valueEventListenerUsuario;
+    private ValueEventListener valueEventListenerMovimentacoes;
 
+    private RecyclerView recyclerView;
+    private AdapterMovimentacao adapterMovimentacao;
+    private List<Movimentacao> movimentacoes = new ArrayList<>();
+    private DatabaseReference movimentacaoRef;
+    private String mesAnoSelecionado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,17 +66,51 @@ public class PrincipalActivity extends AppCompatActivity {
         textoSaudacao = findViewById(R.id.textSaudacao);
         textoSaldo = findViewById(R.id.textSaldo);
         calendarView = findViewById(R.id.calendarView);
+        recyclerView = findViewById(R.id.recyclerMovimentos);
         configuraCalendarView();
-        recuperarResumo();
 
+        //Configurar adapter
+        adapterMovimentacao = new AdapterMovimentacao( movimentacoes, this );
+
+        //Configurar RecyclerView
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager( this );
+        recyclerView.setLayoutManager( layoutManager );
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter( adapterMovimentacao );
+
+    }
+
+    public void recuperarMovimentacoes(){
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        movimentacaoRef = firebaseRef.child("movimentacoes")
+                                     .child( idUsuario )
+                                     .child( mesAnoSelecionado );
+
+        valueEventListenerMovimentacoes = movimentacaoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                movimentacoes.clear();
+                for ( DataSnapshot dados : snapshot.getChildren() ){
+                    Movimentacao movimentacao = dados.getValue( Movimentacao.class );
+                    movimentacoes.add( movimentacao );
+                }
+                adapterMovimentacao.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     public void recuperarResumo(){
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child( idUsuario );
+        usuarioRef = firebaseRef.child("usuarios").child( idUsuario );
 
-        usuarioRef.addValueEventListener(new ValueEventListener() {
+        valueEventListenerUsuario = usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Usuario usuario = snapshot.getValue( Usuario.class );
@@ -114,11 +162,34 @@ public class PrincipalActivity extends AppCompatActivity {
                 "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
         calendarView.setTitleMonths( meses );
 
+        CalendarDay dataAtual = calendarView.getCurrentDate();
+        String mesSelecionado = String.format("%02d", (dataAtual.getMonth()) );
+        mesAnoSelecionado = String.valueOf( mesSelecionado + "" + dataAtual.getYear() );
+
         calendarView.setOnMonthChangedListener(new OnMonthChangedListener() {
             @Override
             public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
+                String mesSelecionado = String.format("%02d", (date.getMonth()) );
+                mesAnoSelecionado = String.valueOf( mesSelecionado + "" + date.getYear() );
 
+                movimentacaoRef.removeEventListener( valueEventListenerMovimentacoes );
+                recuperarMovimentacoes();
             }
         });
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        recuperarResumo();
+        recuperarMovimentacoes();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        usuarioRef.removeEventListener( valueEventListenerUsuario );
+        movimentacaoRef.removeEventListener( valueEventListenerMovimentacoes );
+    }
+
 }
